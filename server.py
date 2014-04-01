@@ -60,7 +60,7 @@ def create_config():
     config.set('server', 'password', '')
     config.set('server', 'irc', 'no')
     config.set('server', 'irc_nick', '')
-    config.set('server', 'coin', '')
+    config.set('server', 'coin', 'litecoin')
     config.set('server', 'datadir', '')
 
     # use leveldb as default
