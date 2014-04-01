@@ -66,15 +66,15 @@ def create_config():
     # use leveldb as default
     config.set('server', 'backend', 'leveldb')
     config.add_section('leveldb')
-    config.set('leveldb', 'path_fulltree', '/dev/shm/electrum_db')
+    config.set('leveldb', 'path_fulltree', '/dev/shm/electrum-ltc_db')
     config.set('leveldb', 'pruning_limit', '100')
 
     for path in ('/etc/', ''):
-        filename = path + 'electrum.conf'
+        filename = path + 'electrum-ltc.conf'
         attempt_read_config(config, filename)
 
     try:
-        with open('/etc/electrum.banner', 'r') as f:
+        with open('/etc/electrum-ltc.banner', 'r') as f:
             config.set('server', 'banner', f.read())
     except IOError:
         pass

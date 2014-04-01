@@ -28,7 +28,7 @@ pruning_limit = 100
 
 [bitcoind]
 host = localhost
-port = 8332
-# user and password from bitcoin.conf
+port = 9332
+# user and password from litecoin.conf
 user = user
 password = password

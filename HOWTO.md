@@ -268,12 +268,12 @@ in case you need to restore it.
 
 ### Step 10. Configure Electrum server
 
-Electrum reads a config file (/etc/electrum.conf) when starting up. This
+Electrum reads a config file (/etc/electrum-ltc.conf) when starting up. This
 file includes the database setup, bitcoind RPC setup, and a few other
 options.
 
-    $ sudo cp ~/src/electrum/server/electrum.conf.sample /etc/electrum.conf
-    $ sudo $EDITOR /etc/electrum.conf
+    $ sudo cp ~/src/electrum/server/electrum.conf.sample /etc/electrum-ltc.conf
+    $ sudo $EDITOR /etc/electrum-ltc.conf
 
 Go through the sample config options and set them to your liking.
 If you intend to run the server publicly have a look at README-IRC.md 

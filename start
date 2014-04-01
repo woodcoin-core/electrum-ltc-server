@@ -7,7 +7,7 @@ if [[ $PID != *[!0-9]* ]]; then
 fi
 
 
-electrum_config="/etc/electrum.conf"
+electrum_config="/etc/electrum-ltc.conf"
 
 if [ ! -f $electrum_config ]; then
     echo "$electrum_config does not exist"
@@ -35,4 +35,4 @@ if [ ! -d $path ]; then
 fi
 
 echo "Starting server as daemon"
-nohup /usr/bin/python -u server.py &> /var/log/electrum.log &
+nohup /usr/bin/python -u server.py &> /var/log/electrum-ltc.log &
