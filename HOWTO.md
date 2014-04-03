@@ -12,7 +12,7 @@ requirements.
 
 The most up-to date version of this document is available at:
 
-    https://github.com/spesmilo/electrum-server/blob/master/HOWTO.md
+    https://github.com/pooler/electrum-ltc-server/blob/master/HOWTO.md
 
 Conventions
 -----------
@@ -20,8 +20,8 @@ Conventions
 In this document, lines starting with a hash sign (#) or a dollar sign ($)
 contain commands. Commands starting with a hash should be run as root,
 commands starting with a dollar should be run as a normal user (in this
-document, we assume that user is called 'bitcoin'). We also assume the
-bitcoin user has sudo rights, so we use '$ sudo command' when we need to.
+document, we assume that user is called 'litecoin'). We also assume the
+litecoin user has sudo rights, so we use '$ sudo command' when we need to.
 
 Strings that are surrounded by "lower than" and "greater than" ( < and > )
 should be replaced by the user with something appropriate. For example,
@@ -53,10 +53,10 @@ build chain. You will need root access in order to install other software or
 Python libraries. 
 
 **Hardware.** The lightest setup is a pruning server with diskspace 
-requirements of about 10 GB for the electrum database. However note that 
-you also need to run bitcoind and keep a copy of the full blockchain, 
-which is roughly 20 GB in April 2014. If you have less than 2 GB of RAM 
-make sure you limit bitcoind to 8 concurrent connections. If you have more 
+requirements of about 4 GB for the electrum database. However note that 
+you also need to run litecoind and keep a copy of the full blockchain, 
+which is roughly 4 GB in April 2014. If you have less than 2 GB of RAM 
+make sure you limit litecoind to 8 concurrent connections. If you have more 
 ressources to  spare you can run the server with a higher limit of historic 
 transactions per address. CPU speed is important, mostly for the initial block 
 chain import, but also if you plan to run a public Electrum server, which 
@@ -67,21 +67,21 @@ has enough RAM to hold and procss the leveldb database in tmpfs (e.g. /dev/shm).
 Instructions
 ------------
 
-### Step 1. Create a user for running bitcoind and Electrum server
+### Step 1. Create a user for running litecoind and Electrum server
 
 This step is optional, but for better security and resource separation I
-suggest you create a separate user just for running `bitcoind` and Electrum.
+suggest you create a separate user just for running `litecoind` and Electrum.
 We will also use the `~/bin` directory to keep locally installed files
 (others might want to use `/usr/local/bin` instead). We will download source
 code files to the `~/src` directory.
 
-    $ sudo adduser bitcoin --disabled-password
+    $ sudo adduser litecoin --disabled-password
     $ sudo apt-get install git
-    # su - bitcoin
+    # su - litecoin
     $ mkdir ~/bin ~/src
     $ echo $PATH
 
-If you don't see `/home/bitcoin/bin` in the output, you should add this line
+If you don't see `/home/litecoin/bin` in the output, you should add this line
 to your `.bashrc`, `.profile` or `.bash_profile`, then logout and relogin:
 
     PATH="$HOME/bin:$PATH"
@@ -93,42 +93,36 @@ our ~/bin directory:
 
     $ mkdir -p ~/src/electrum
     $ cd ~/src/electrum
-    $ git clone https://github.com/spesmilo/electrum-server.git server
+    $ git clone https://github.com/pooler/electrum-ltc-server.git server
     $ chmod +x ~/src/electrum/server/start
-    $ ln -s ~/src/electrum/server/start ~/bin/electrum-server
+    $ ln -s ~/src/electrum/server/start ~/bin/electrum-ltc-server
 
-### Step 3. Download bitcoind
+### Step 3. Download litecoind
 
-Older versions of Electrum used to require a patched version of bitcoind. 
-This is not the case anymore since bitcoind supports the 'txindex' option.
-We currently recommend bitcoind 0.9.0 stable.
+Older versions of Electrum used to require a patched version of litecoind. 
+This is not the case anymore since litecoind supports the 'txindex' option.
+We currently recommend litecoind 0.8.6.2 stable.
 
-If your package manager does not supply a recent bitcoind and prefer to compile
-here are some pointers for Ubuntu:
+If you prefer to compile litecoind, here are some pointers for Ubuntu:
 
-    # apt-get install make g++ python-leveldb libboost-all-dev libssl-dev libdb++-dev pkg-config
-    # su - bitcoin
-    $ cd ~/src && wget https://bitcoin.org/bin/0.9.0/bitcoin-0.9.0-linux.tar.gz
-    $ sha256sum bitcoin-0.9.0-linux.tar.gz | grep 0f767c13b2c670939750a26558cbb40a7f89ff5ba7d42ce63da0bcc0b701642d
-    $ tar xfz bitcoin-0.9.0-linux.tar.gz
-    $ cd bitcoin-0.9.0-linux/src
-    $ tar xfz bitcoin-0.9.0.tar.gz
-    $ cd bitcoin-0.9.0
-    $ ./configure --disable-wallet --without-miniupnpc
-    $ make
-    $ strip ~/src/bitcoin-0.9.0-linux/src/bitcoin-0.9.0/src/bitcoind
-    $ cp -a ~/src/bitcoin-0.9.0-linux/src/bitcoin-0.9.0/src/bitcoind ~/bin/bitcoind
+    # apt-get install make g++ python-leveldb libboost-all-dev libssl-dev libdb++-dev pkg-config libminiupnpc-dev git
+    # su - litecoin
+    $ cd ~/src && git clone https://github.com/litecoin-project/litecoin.git
+    $ cd litecoin/src
+    $ make -f makefile.unix
+    $ strip litecoind
+    $ cp -a ~/src/litecoin/src/litecoind ~/bin/litecoind
 
-### Step 4. Configure and start bitcoind
+### Step 4. Configure and start litecoind
 
-In order to allow Electrum to "talk" to `bitcoind`, we need to set up a RPC
-username and password for `bitcoind`. We will then start `bitcoind` and
+In order to allow Electrum to "talk" to `litecoind`, we need to set up a RPC
+username and password for `litecoind`. We will then start `litecoind` and
 wait for it to complete downloading the blockchain.
 
-    $ mkdir ~/.bitcoin
-    $ $EDITOR ~/.bitcoin/bitcoin.conf
+    $ mkdir ~/.litecoin
+    $ $EDITOR ~/.litecoin/litecoin.conf
 
-Write this in `bitcoin.conf`:
+Write this in `litecoin.conf`:
 
     rpcuser=<rpc-username>
     rpcpassword=<rpc-password>
@@ -136,24 +130,24 @@ Write this in `bitcoin.conf`:
     txindex=1
 
 
-If you have an existing installation of bitcoind and have not previously
+If you have an existing installation of litecoind and have not previously
 set txindex=1 you need to reindex the blockchain by running
 
-    $ bitcoind -reindex
+    $ litecoind -reindex
 
-If you have a fresh copy of bitcoind start `bitcoind`:
+If you have a fresh copy of litecoind start `litecoind`:
 
-    $ bitcoind
+    $ litecoind
 
-Allow some time to pass, so `bitcoind` connects to the network and starts
+Allow some time to pass, so `litecoind` connects to the network and starts
 downloading blocks. You can check its progress by running:
 
-    $ bitcoind getinfo
+    $ litecoind getinfo
 
-Before starting electrum server your bitcoind should have processed all 
+Before starting electrum server your litecoind should have processed all 
 blockes and caught up to the current height of the network.
-You should also set up your system to automatically start bitcoind at boot
-time, running as the 'bitcoin' user. Check your system documentation to
+You should also set up your system to automatically start litecoind at boot
+time, running as the 'litecoin' user. Check your system documentation to
 find out the best way to do this.
 
 ### Step 5. Install Electrum dependencies
@@ -207,7 +201,7 @@ http://foundry.electrum.org/
 
 Alternatively if you have the time and nerve you can import the blockchain yourself.
 
-As of April 2014 it takes between two days and over a week to import 300k of blocks, depending
+As of April 2014 it takes between one and two days to import 500k of blocks, depending
 on CPU speed, I/O speed and selected pruning limit.
 
 It's considerably faster and strongly recommended to index in memory. You can use /dev/shm or
@@ -215,15 +209,15 @@ or create a tmpfs which will also use swap if you run out of memory:
 
     $ sudo mount -t tmpfs -o rw,nodev,nosuid,noatime,size=15000M,mode=0777 none /tmpfs
 
-If you use tmpfs make sure you have enough RAM and swap to cover the size. If you only have 4 gigs of
+If you use tmpfs make sure you have enough RAM and swap to cover the size. If you only have 2 gigs of
 RAM but add 15 gigs of swap from a file that's fine too. tmpfs is rather smart to swap out the least
 used parts. It's fine to use a file on a SSD for swap in thise case. 
 
 It's not recommended to do initial indexing of the database on a SSD because the indexing process
-does at least 20 TB (!) of disk writes and puts considerable wear-and-tear on a SSD. It's a lot better
+does at least 10 TB (!) of disk writes and puts considerable wear-and-tear on a SSD. It's a lot better
 to use tmpfs and just swap out to disk when necessary.   
 
-Databases have grown to roughly 8 GB in April 2014, give or take a gigabyte between pruning limits 
+Databases have grown to roughly 4 GB in April 2014, give or take a gigabyte between pruning limits 
 100 and 10000. Leveldb prunes the database from time to time, so it's not uncommon to see databases
 ~50% larger at times when it's writing a lot especially when indexing from the beginning.
 
@@ -269,7 +263,7 @@ in case you need to restore it.
 ### Step 10. Configure Electrum server
 
 Electrum reads a config file (/etc/electrum-ltc.conf) when starting up. This
-file includes the database setup, bitcoind RPC setup, and a few other
+file includes the database setup, litecoind RPC setup, and a few other
 options.
 
     $ sudo cp ~/src/electrum/server/electrum.conf.sample /etc/electrum-ltc.conf
@@ -287,7 +281,7 @@ root user who usually passes this value to all unprivileged user sessions too.
 
     $ sudo sed -i '$a ulimit -n 16384' /root/.bashrc
 
-Also make sure the bitcoin user can actually increase the ulimit by allowing it accordingly in
+Also make sure the litecoin user can actually increase the ulimit by allowing it accordingly in
 /etc/security/limits.conf
 
 While most bugs are fixed in this regard electrum server may leak some memory and it's good practice to
@@ -296,9 +290,9 @@ it for crashes and then restart the server. Monthly restarts should be fine for 
 
 Two more things for you to consider:
 
-1. To increase security you may want to close bitcoind for incoming connections and connect outbound only
+1. To increase security you may want to close litecoind for incoming connections and connect outbound only
 
-2. Consider restarting bitcoind (together with electrum-server) on a weekly basis to clear out unconfirmed
+2. Consider restarting litecoind (together with electrum-server) on a weekly basis to clear out unconfirmed
    transactions from the local the memory pool which did not propagate over the network
 
 ### Step 12. (Finally!) Run Electrum server
@@ -328,7 +322,7 @@ or hostname and the port. Press Ok, the client will disconnect from the
 current server and connect to your new Electrum server. You should see your
 addresses and transactions history. You can see the number of blocks and
 response time in the Server selection window. You should send/receive some
-bitcoins to confirm that everything is working properly.
+litecoins to confirm that everything is working properly.
 
 ### Step 14. Join us on IRC, subscribe to the server thread
 
