@@ -128,6 +128,7 @@ Write this in `litecoin.conf`:
     rpcpassword=<rpc-password>
     daemon=1
     txindex=1
+    disablewallet=1
 
 
 If you have an existing installation of litecoind and have not previously
