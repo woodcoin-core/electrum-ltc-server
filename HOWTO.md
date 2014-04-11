@@ -197,7 +197,7 @@ It's recommended to fetch a pre-processed leveldb from the net
 
 You can fetch recent copies of electrum leveldb databases and further instructions 
 from the Electrum full archival server foundry at:
-http://foundry.electrum.org/ 
+http://foundry.electrum-ltc.org/leveldb-dump/
 
 Alternatively if you have the time and nerve you can import the blockchain yourself.
 
