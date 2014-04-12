@@ -91,11 +91,8 @@ to your `.bashrc`, `.profile` or `.bash_profile`, then logout and relogin:
 We will download the latest git snapshot for Electrum and 'install' it in
 our ~/bin directory:
 
-    $ mkdir -p ~/src/electrum
-    $ cd ~/src/electrum
-    $ git clone https://github.com/pooler/electrum-ltc-server.git server
-    $ chmod +x ~/src/electrum/server/start
-    $ ln -s ~/src/electrum/server/start ~/bin/electrum-ltc-server
+    $ mkdir -p ~/electrum-server
+    $ git clone https://github.com/pooler/electrum-ltc-server.git electrum-server
 
 ### Step 3. Download litecoind
 
@@ -267,7 +264,7 @@ Electrum reads a config file (/etc/electrum-ltc.conf) when starting up. This
 file includes the database setup, litecoind RPC setup, and a few other
 options.
 
-    $ sudo cp ~/src/electrum/server/electrum.conf.sample /etc/electrum-ltc.conf
+    $ sudo cp ~/electrum-server/electrum.conf.sample /etc/electrum-ltc.conf
     $ sudo $EDITOR /etc/electrum-ltc.conf
 
 Go through the sample config options and set them to your liking.
@@ -300,16 +297,17 @@ Two more things for you to consider:
 
 The magic moment has come: you can now start your Electrum server:
 
-    $ start
+    $ cd ~/electrum-server
+    $ ./start
 
-You should see this on the screen:
+You should see this in the log file:
 
     starting Electrum server
-    cache: yes
 
 If you want to stop Electrum server, use the 'stop' script:
 
-    $ stop
+    $ cd ~/electrum-server
+    $ ./stop
 
 
 ### Step 13. Test the Electrum server
