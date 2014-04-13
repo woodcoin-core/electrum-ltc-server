@@ -45,7 +45,7 @@ __________________________________________________________
 backend = leveldb
 
 [leveldb]
-path = /path/to/your/database
+path_fulltree = /path/to/your/database
 pruning_limit = 10
 
 ______________________________________________________________
@@ -55,7 +55,7 @@ ______________________________________________________________
 In order to speed up the initial catch_up phase, it is recommended to
 locate your database in shared memory:
 
- path = /run/shm/electrum-ltc_db
+ path_fulltree = /run/shm/electrum-ltc_db
 
 Once your server has finished catching up, copy your database to disk
 and update the path in /etc/electrum-ltc.conf

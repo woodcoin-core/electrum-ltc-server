@@ -88,8 +88,7 @@ to your `.bashrc`, `.profile` or `.bash_profile`, then logout and relogin:
 
 ### Step 2. Download and install Electrum
 
-We will download the latest git snapshot for Electrum and 'install' it in
-our ~/bin directory:
+We will download the latest git snapshot for Electrum server:
 
     $ mkdir -p ~/electrum-server
     $ git clone https://github.com/pooler/electrum-ltc-server.git electrum-server
