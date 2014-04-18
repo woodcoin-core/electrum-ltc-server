@@ -328,8 +328,8 @@ Say hi to the dev crew, other server operators and fans on
 irc.freenode.net #electrum-ltc and we'll try to congratulate you
 on supporting the community by running an Electrum node
 
-If you're operating a public Electrum server please subscribe
-to or regulary check the following thread:
-https://bitcointalk.org/index.php?topic=85475.0
-It'll contain announcements about important updates to Electrum
+If you're operating a public Electrum-LTC server please subscribe
+to the following mailing list:
+https://groups.google.com/forum/#!forum/electrum-ltc-server
+It'll contain announcements about important updates to Electrum-LTC
 server required for a smooth user experience.
