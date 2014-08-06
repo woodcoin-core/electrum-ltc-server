@@ -1,7 +1,9 @@
-import plyvel, ast, hashlib, traceback, os
+import plyvel, ast, hashlib, traceback, os, sys
 from processor import print_log
-from utils import *
+from utils import bc_address_to_hash_160, hash_160_to_pubkey_address, hex_to_int, int_to_hex, Hash
 
+global GENESIS_HASH
+GENESIS_HASH = '12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2'
 
 """
 Patricia tree for hashing unspents
@@ -15,7 +17,7 @@ class Storage(object):
 
     def __init__(self, config, shared, test_reorgs):
 
-        self.dbpath = config.get('leveldb', 'path_fulltree')
+        self.dbpath = config.get('leveldb', 'path')
         if not os.path.exists(self.dbpath):
             os.mkdir(self.dbpath)
         self.pruning_limit = config.getint('leveldb', 'pruning_limit')
@@ -42,7 +44,7 @@ class Storage(object):
             #traceback.print_exc(file=sys.stdout)
             print_log('initializing database')
             self.height = 0
-            self.last_hash = '12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2'
+            self.last_hash = GENESIS_HASH
             db_version = self.db_version
             # write root
             self.put_node('', {})
@@ -65,7 +67,7 @@ class Storage(object):
         return bc_address_to_hash_160(addr)
 
     def key_to_address(self, addr):
-        return hash_160_to_bc_address(addr)
+        return hash_160_to_pubkey_address(addr)
 
 
     def get_proof(self, addr):

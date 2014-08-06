@@ -61,6 +61,7 @@ class TcpClientResponder(threading.Thread):
     def __init__(self, session):
         self.session = session
         threading.Thread.__init__(self)
+        self.daemon = True
 
     def run(self):
         while not self.session.stopped():
@@ -86,6 +87,7 @@ class TcpClientRequestor(threading.Thread):
         self.message = ""
         self.session = session
         threading.Thread.__init__(self)
+        self.daemon = True
 
     def run(self):
         try:
@@ -169,6 +171,15 @@ class TcpServer(threading.Thread):
         sock.listen(5)
 
         while not self.shared.stopped():
+
+            if self.shared.paused():
+                sessions = self.dispatcher.get_sessions()
+                if sessions:
+                    print_log("closing %d sessions"%len(sessions))
+                for s in sessions:
+                    s.stop()
+                time.sleep(1)
+                continue
 
             #if self.use_ssl: print_log("SSL: socket listening")
             try:

@@ -15,6 +15,7 @@
 # License along with this program.  If not, see
 # <http://www.gnu.org/licenses/agpl.html>.
 
+import argparse
 import ConfigParser
 import logging
 import socket
@@ -25,6 +26,9 @@ import traceback
 
 import json
 import os
+
+import utils
+from backends.bitcoind import storage, networks
 
 logging.basicConfig()
 
@@ -39,18 +43,40 @@ def attempt_read_config(config, filename):
     except IOError:
         pass
 
+def load_banner(config):
+    try:
+        with open(config.get('server', 'banner_file'), 'r') as f:
+            config.set('server', 'banner', f.read())
+    except IOError:
+        pass
 
-def create_config():
+def setup_network_params(config):
+    type = config.get('network', 'type')
+    params = networks.params.get(type)
+    utils.PUBKEY_ADDRESS = int(params.get('pubkey_address'))
+    utils.SCRIPT_ADDRESS = int(params.get('script_address'))
+    storage.GENESIS_HASH = params.get('genesis_hash')
+
+    if config.has_option('network', 'pubkey_address'):
+        utils.PUBKEY_ADDRESS = config.getint('network', 'pubkey_address')
+    if config.has_option('network', 'script_address'):
+        utils.SCRIPT_ADDRESS = config.getint('network', 'script_address')
+    if config.has_option('network', 'genesis_hash'):
+        storage.GENESIS_HASH = config.get('network', 'genesis_hash')
+
+def create_config(filename=None):
     config = ConfigParser.ConfigParser()
     # set some defaults, which will be overwritten by the config file
     config.add_section('server')
     config.set('server', 'banner', 'Welcome to Electrum!')
+    config.set('server', 'banner_file', '/etc/electrum-ltc.banner')
     config.set('server', 'host', 'localhost')
+    config.set('server', 'electrum_rpc_port', '8000')
     config.set('server', 'report_host', '')
     config.set('server', 'stratum_tcp_port', '50001')
-    config.set('server', 'stratum_http_port', '8081')
+    config.set('server', 'stratum_http_port', '')
     config.set('server', 'stratum_tcp_ssl_port', '50002')
-    config.set('server', 'stratum_http_ssl_port', '8082')
+    config.set('server', 'stratum_http_ssl_port', '')
     config.set('server', 'report_stratum_tcp_port', '')
     config.set('server', 'report_stratum_http_port', '')
     config.set('server', 'report_stratum_tcp_ssl_port', '')
@@ -62,30 +88,38 @@ def create_config():
     config.set('server', 'irc_nick', '')
     config.set('server', 'coin', 'litecoin')
     config.set('server', 'datadir', '')
+    config.set('server', 'use_poller', False)
 
-    # use leveldb as default
-    config.set('server', 'backend', 'leveldb')
     config.add_section('leveldb')
-    config.set('leveldb', 'path_fulltree', '/dev/shm/electrum-ltc_db')
+    config.set('leveldb', 'path', '/dev/shm/electrum-ltc_db')
     config.set('leveldb', 'pruning_limit', '100')
 
-    for path in ('/etc/', ''):
-        filename = path + 'electrum-ltc.conf'
-        attempt_read_config(config, filename)
+    # set network parameters
+    config.add_section('network')
+    config.set('network', 'type', 'litecoin_main')
 
-    try:
-        with open('/etc/electrum-ltc.banner', 'r') as f:
-            config.set('server', 'banner', f.read())
-    except IOError:
-        pass
+    # try to find the config file in the default paths
+    if not filename:
+        for path in ('/etc/', ''):
+            filename = path + 'electrum-ltc.conf'
+            if os.path.isfile(filename):
+                break
+
+    if not os.path.isfile(filename):
+        print 'could not find electrum configuration file "%s"' % filename
+        sys.exit(1)
+
+    attempt_read_config(config, filename)
+
+    load_banner(config)
 
     return config
 
 
-def run_rpc_command(params):
+def run_rpc_command(params, electrum_rpc_port):
     cmd = params[0]
     import xmlrpclib
-    server = xmlrpclib.ServerProxy('http://localhost:8000')
+    server = xmlrpclib.ServerProxy('http://localhost:%d' % electrum_rpc_port)
     func = getattr(server, cmd)
     r = func(*params[1:])
 
@@ -102,6 +136,9 @@ def run_rpc_command(params):
     else:
         print r
 
+def cmd_banner_update():
+    load_banner(dispatcher.shared.config)
+    return True
 
 def cmd_info():
     return map(lambda s: {"time": s.time,
@@ -130,9 +167,15 @@ def get_port(config, name):
         return None
 
 if __name__ == '__main__':
-    config = create_config()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--conf', metavar='path', default=None, help='specify a configuration file')
+    parser.add_argument('command', nargs='*', default=[], help='send a command to the server')
+    args = parser.parse_args()
+
+    config = create_config(args.conf)
     password = config.get('server', 'password')
     host = config.get('server', 'host')
+    electrum_rpc_port = get_port(config, 'electrum_rpc_port')
     stratum_tcp_port = get_port(config, 'stratum_tcp_port')
     stratum_http_port = get_port(config, 'stratum_http_port')
     stratum_tcp_ssl_port = get_port(config, 'stratum_tcp_ssl_port')
@@ -140,19 +183,22 @@ if __name__ == '__main__':
     ssl_certfile = config.get('server', 'ssl_certfile')
     ssl_keyfile = config.get('server', 'ssl_keyfile')
 
-    if stratum_tcp_ssl_port or stratum_http_ssl_port:
-        assert ssl_certfile and ssl_keyfile
+    setup_network_params(config)
 
-    if len(sys.argv) > 1:
+    if ssl_certfile is '' or ssl_keyfile is '':
+        stratum_tcp_ssl_port = None
+        stratum_http_ssl_port = None
+
+    if len(args.command) >= 1:
         try:
-            run_rpc_command(sys.argv[1:])
+            run_rpc_command(args.command, electrum_rpc_port)
         except socket.error:
             print "server not running"
             sys.exit(1)
         sys.exit(0)
 
     try:
-        run_rpc_command(['getpid'])
+        run_rpc_command(['getpid'], electrum_rpc_port)
         is_running = True
     except socket.error:
         is_running = False
@@ -164,20 +210,18 @@ if __name__ == '__main__':
 
     from processor import Dispatcher, print_log
     from backends.irc import ServerProcessor
-    from transports.stratum_tcp import TcpServer
-    from transports.stratum_http import HttpServer
+    from backends.bitcoind import BlockchainProcessor
 
-    backend_name = config.get('server', 'backend')
-    if backend_name == 'libbitcoin':
-        from backends.libbitcoin import BlockchainProcessor
-    elif backend_name == 'leveldb':
-        from backends.bitcoind import BlockchainProcessor
+    use_poller = config.getboolean('server', 'use_poller')
+    if use_poller:
+        from transports.poller import TcpServer
     else:
-        print "Unknown backend '%s' specified\n" % backend_name
-        sys.exit(1)
+        from transports.stratum_tcp import TcpServer
+    from transports.stratum_http import HttpServer
 
     print "\n\n\n\n\n"
     print_log("Starting Electrum server on", host)
+    print_log("use_poller", use_poller)
 
     # Create hub
     dispatcher = Dispatcher(config)
@@ -223,11 +267,12 @@ if __name__ == '__main__':
     
 
     from SimpleXMLRPCServer import SimpleXMLRPCServer
-    server = SimpleXMLRPCServer(('localhost',8000), allow_none=True, logRequests=False)
+    server = SimpleXMLRPCServer(('localhost', electrum_rpc_port), allow_none=True, logRequests=False)
     server.register_function(lambda: os.getpid(), 'getpid')
     server.register_function(shared.stop, 'stop')
     server.register_function(cmd_info, 'info')
     server.register_function(cmd_debug, 'debug')
+    server.register_function(cmd_banner_update, 'banner_update')
     server.socket.settimeout(1)
  
     while not shared.stopped():

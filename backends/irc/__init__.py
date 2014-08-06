@@ -43,9 +43,8 @@ class IrcThread(threading.Thread):
         self.prepend = 'E_'
         if config.get('server', 'coin') == 'litecoin':
             self.prepend = 'EL_'
-        self.pruning = config.get('server', 'backend') == 'leveldb'
-        if self.pruning:
-            self.pruning_limit = config.get('leveldb', 'pruning_limit')
+        self.pruning = True
+        self.pruning_limit = config.get('leveldb', 'pruning_limit')
         self.nick = self.prepend + self.nick
 
     def get_peers(self):
@@ -71,6 +70,9 @@ class IrcThread(threading.Thread):
         return s
 
     def run(self):
+        while self.processor.shared.paused():
+            time.sleep(1)
+
         ircname = self.getname()
         print_log("joining IRC")
 
@@ -159,7 +161,7 @@ class ServerProcessor(Processor):
     def __init__(self, config):
         Processor.__init__(self)
         self.daemon = True
-        self.banner = config.get('server', 'banner')
+        self.config = config
 
         if config.get('server', 'irc') == 'yes':
             self.irc = IrcThread(self, config)
@@ -183,7 +185,7 @@ class ServerProcessor(Processor):
         result = None
 
         if method == 'server.banner':
-            result = self.banner.replace('\\n', '\n')
+            result = self.config.get('server', 'banner').replace('\\n', '\n')
 
         elif method == 'server.peers.subscribe':
             result = self.get_peers()

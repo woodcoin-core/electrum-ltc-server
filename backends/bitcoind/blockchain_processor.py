@@ -36,7 +36,7 @@ class BlockchainProcessor(Processor):
         self.chunk_cache = {}
         self.cache_lock = threading.Lock()
         self.headers_data = ''
-        self.headers_path = config.get('leveldb', 'path_fulltree')
+        self.headers_path = config.get('leveldb', 'path')
 
         self.mempool_values = {}
         self.mempool_addresses = {}
@@ -60,36 +60,32 @@ class BlockchainProcessor(Processor):
             config.get('bitcoind', 'host'),
             config.get('bitcoind', 'port'))
 
-        while True:
-            try:
-                self.bitcoind('getinfo')
-                break
-            except:
-                print_log('cannot contact litecoind...')
-                time.sleep(5)
-                continue
-
         self.sent_height = 0
         self.sent_header = None
 
         # catch_up headers
         self.init_headers(self.storage.height)
 
-        threading.Timer(0, lambda: self.catch_up(sync=False)).start()
-        while not shared.stopped() and not self.up_to_date:
-            try:
-                time.sleep(1)
-            except:
-                print "keyboard interrupt: stopping threads"
-                shared.stop()
-                sys.exit(0)
+        self.blockchain_thread = threading.Thread(target = self.do_catch_up)
+        self.blockchain_thread.start()
 
+
+    def do_catch_up(self):
+
+        # this will unpause shared
+        self.header = self.block2header(self.bitcoind('getblock', [self.storage.last_hash]))
+        self.header['utxo_root'] = self.storage.get_root_hash().encode('hex')
+
+        self.catch_up(sync=False)
         print_log("Blockchain is up to date.")
         self.memorypool_update()
         print_log("Memory pool initialized.")
 
-        self.timer = threading.Timer(10, self.main_iteration)
-        self.timer.start()
+        self.shared.unpause()
+
+        while not self.shared.stopped():
+            self.main_iteration()
+            time.sleep(10)
 
 
 
@@ -110,12 +106,21 @@ class BlockchainProcessor(Processor):
 
     def bitcoind(self, method, params=[]):
         postdata = dumps({"method": method, 'params': params, 'id': 'jsonrpc'})
-        try:
-            respdata = urllib.urlopen(self.bitcoind_url, postdata).read()
-        except:
-            print_log("error calling litecoind")
-            traceback.print_exc(file=sys.stdout)
-            self.shared.stop()
+        while True:
+            try:
+                respdata = urllib.urlopen(self.bitcoind_url, postdata).read()
+                if self.shared.paused():
+                    print_log("litecoind is responding")
+                    self.shared.unpause()
+                break
+            except:
+                print_log("cannot reach litecoind...")
+                self.shared.pause()
+                time.sleep(10)
+                if self.shared.stopped():
+                    # this will end the thread
+                    raise
+                continue
 
         r = loads(respdata)
         if r['error'] is not None:
@@ -159,10 +164,17 @@ class BlockchainProcessor(Processor):
 
         try:
             while height < db_height:
-                height = height + 1
+                height += 1
                 header = self.get_header(height)
                 if height > 1:
-                    assert prev_hash == header.get('prev_block_hash')
+                    if prev_hash != header.get('prev_block_hash'):
+                        # The prev_hash block is orphaned, go back
+                        print_log("reorganizing, a block in file is orphaned:", prev_hash)
+                        # Go to the parent of the orphaned block
+                        height -= 2
+                        prev_hash = self.hash_header(self.read_header(height))
+                        continue
+
                 self.write_header(header, sync=False)
                 prev_hash = self.hash_header(header)
                 if (height % 1000) == 0:
@@ -648,14 +660,19 @@ class BlockchainProcessor(Processor):
                 self.up_to_date = True
                 break
 
-            # not done..
-            self.up_to_date = False
-            next_block_hash = self.bitcoind('getblockhash', [self.storage.height + 1])
-            next_block = self.getfullblock(next_block_hash)
-            self.mtime('daemon')
-
             # fixme: this is unsafe, if we revert when the undo info is not yet written
             revert = (random.randint(1, 100) == 1) if self.test_reorgs else False
+
+            # not done..
+            self.up_to_date = False
+            try:
+                next_block_hash = self.bitcoind('getblockhash', [self.storage.height + 1])
+                next_block = self.getfullblock(next_block_hash)
+            except BaseException, e:
+                revert = True
+                next_block = self.getfullblock(self.storage.last_hash)
+
+            self.mtime('daemon')
 
             if (next_block.get('previousblockhash') == self.storage.last_hash) and not revert:
 
@@ -809,7 +826,7 @@ class BlockchainProcessor(Processor):
 
     
     def close(self):
-        self.timer.join()
+        self.blockchain_thread.join()
         print_log("Closing database...")
         self.storage.close()
         print_log("Database is closed")
@@ -860,7 +877,4 @@ class BlockchainProcessor(Processor):
                         'params': [addr, status],
                         })
 
-        # next iteration 
-        self.timer = threading.Timer(10, self.main_iteration)
-        self.timer.start()
 

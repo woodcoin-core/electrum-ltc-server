@@ -1,5 +1,14 @@
 #!/bin/bash
 
+#setting a higher ulimit for open files, you might need to allow it for the user running electrum-sevrer in /etc/security/limits.conf first (see HOWTO)
+ulimit -n 65536
+
+if [ "$(id -u)" == "0" ]; then
+   echo "Remember you don't have to run electrum server as root. Consider using a non priviled user." 1>&2
+   # exit 1
+fi
+
+cd "$( dirname "${BASH_SOURCE[0]}" )"
 PID=`/usr/bin/python server.py getpid`
 if [[ $PID != *[!0-9]* ]]; then
     echo "Server already running (pid $PID)"
@@ -14,12 +23,11 @@ if [ ! -f $electrum_config ]; then
     exit
 fi
 
-path=`grep -e ^path_fulltree $electrum_config |awk -F\= '{print $2}' | tail -n 1`
+path=`grep -e ^path $electrum_config |awk -F\= '{print $2}' | tail -n 1`
 
 if ! [ "$path" ]; then
-    echo "Variable path_fulltree not set in $electrum_config"
+    echo "Variable path not set in $electrum_config"
     exit
-    # we're actually forcing fulltree with this clause, which is ok if displaying v0.9 should use fulltree 
 fi
 
 rmdir $path --ignore-fail-on-non-empty
@@ -34,5 +42,9 @@ if [ ! -d $path ]; then
     fi
 fi
 
+if [ electrum-ltc.log ]; then
+    mv electrum-ltc.log electrum-ltc.log.1
+fi
+
 echo "Starting server as daemon"
-nohup /usr/bin/python -u server.py &> /var/log/electrum-ltc.log &
+nohup /usr/bin/python -u server.py &> electrum-ltc.log &
