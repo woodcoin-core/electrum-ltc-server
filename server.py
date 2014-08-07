@@ -87,8 +87,7 @@ def create_config(filename=None):
     config.set('server', 'irc', 'no')
     config.set('server', 'irc_nick', '')
     config.set('server', 'coin', 'litecoin')
-    config.set('server', 'datadir', '')
-    config.set('server', 'use_poller', False)
+    config.set('server', 'use_poller', 'yes')
 
     config.add_section('leveldb')
     config.set('leveldb', 'path', '/dev/shm/electrum-ltc_db')
