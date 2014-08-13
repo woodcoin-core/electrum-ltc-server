@@ -3,11 +3,10 @@ import Queue as queue
 import socket
 import threading
 import time
-import traceback
 import sys
 
 from utils import random_string, timestr, print_log
-
+from utils import logger
 
 class Shared:
 
@@ -69,7 +68,7 @@ class Processor(threading.Thread):
             try:
                 self.process(request, session)
             except:
-                traceback.print_exc(file=sys.stdout)
+                logger.error("process error", exc_info=True)
 
         self.close()
 
@@ -132,7 +131,7 @@ class RequestDispatcher(threading.Thread):
             try:
                 self.do_dispatch(session, request)
             except:
-                traceback.print_exc(file=sys.stdout)
+                logger.error('dispatch',exc_info=True)
 
             if time.time() - lastgc > 60.0:
                 self.collect_garbage()
@@ -213,23 +212,12 @@ class Session:
     def key(self):
         return self.name + self.address
 
-
     # Debugging method. Doesn't need to be threadsafe.
     def info(self):
-        for sub in self.subscriptions:
-            #print sub
-            method = sub[0]
-            if method == 'blockchain.address.subscribe':
-                addr = sub[1]
-                break
-        else:
-            addr = None
-
         if self.subscriptions:
             print_log("%4s" % self.name,
-                      "%15s" % self.address,
-                      "%35s" % addr,
-                      "%3d" % len(self.subscriptions),
+                      "%21s" % self.address,
+                      "%4d" % len(self.subscriptions),
                       self.version)
 
     def stop(self):

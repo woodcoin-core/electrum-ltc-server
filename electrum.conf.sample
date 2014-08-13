@@ -1,5 +1,9 @@
 [server]
+# username for running the daemon
+username = 
+# hostname. set it to a FQDN in order to be reached from outside
 host = localhost
+# ports
 electrum_rpc_port = 8000
 stratum_tcp_port = 50001
 #stratum_tcp_ssl_port = 50002
@@ -13,17 +17,18 @@ banner_file = /etc/electrum-ltc.banner
 #irc_nick = <yournickname>
 #ssl_certfile = /path/to/electrum-server.crt
 #ssl_keyfile = /path/to/electrum-server.key
-# poll mode is a more efficient method for holding connections, will be a default in the future, test if you like
-#use_poller = no
+logfile = /var/log/electrum-ltc.log
+donation_address = 
 
 [leveldb]
-path = /path/to/your/database
+# path to your database
+path = 
 # for each address, history will be pruned if it is longer than this limit
 pruning_limit = 100
 
 [bitcoind]
 host = localhost
-port = 9332
+port = 8332
 # user and password from litecoin.conf
-user = user
-password = password
+user = 
+password = 

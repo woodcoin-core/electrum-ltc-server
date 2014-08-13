@@ -22,19 +22,24 @@ import socket
 import sys
 import time
 import threading
-import traceback
-
 import json
 import os
 
-import utils
-from backends.bitcoind import storage, networks
+
+from src import storage, networks, utils
+from src.processor import Dispatcher, print_log
+from src.irc import ServerProcessor
+from src.blockchain_processor import BlockchainProcessor
 
 logging.basicConfig()
 
 if sys.maxsize <= 2**32:
     print "Warning: it looks like you are using a 32bit system. You may experience crashes caused by mmap"
 
+if os.getuid() == 0:
+    print "Do not run this program as root!"
+    print "Run the install script to create a non-privileged user."
+    sys.exit()
 
 def attempt_read_config(config, filename):
     try:
@@ -88,6 +93,7 @@ def create_config(filename=None):
     config.set('server', 'irc_nick', '')
     config.set('server', 'coin', 'litecoin')
     config.set('server', 'use_poller', 'yes')
+    config.set('server', 'logfile', '/var/log/electrum-ltc.log')
 
     config.add_section('leveldb')
     config.set('leveldb', 'path', '/dev/shm/electrum-ltc_db')
@@ -172,6 +178,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     config = create_config(args.conf)
+    logfile = config.get('server', 'logfile')
+    utils.init_logger(logfile)
     password = config.get('server', 'password')
     host = config.get('server', 'host')
     electrum_rpc_port = get_port(config, 'electrum_rpc_port')
@@ -207,18 +215,13 @@ if __name__ == '__main__':
         sys.exit(1)
 
 
-    from processor import Dispatcher, print_log
-    from backends.irc import ServerProcessor
-    from backends.bitcoind import BlockchainProcessor
-
     use_poller = config.getboolean('server', 'use_poller')
     if use_poller:
-        from transports.poller import TcpServer
+        from src.poller import TcpServer
     else:
-        from transports.stratum_tcp import TcpServer
-    from transports.stratum_http import HttpServer
+        from src.stratum_tcp import TcpServer
+    from src.stratum_http import HttpServer
 
-    print "\n\n\n\n\n"
     print_log("Starting Electrum server on", host)
     print_log("use_poller", use_poller)
 

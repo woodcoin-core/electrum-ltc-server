@@ -225,10 +225,26 @@ def timestr():
     return time.strftime("[%d/%m/%Y-%H:%M:%S]")
 
 
-print_lock = threading.Lock()
+
+### logger
+import logging
+import logging.handlers
+
+logger = logging.getLogger('electrum-ltc')
+
+def init_logger(logfile):
+    hdlr = logging.handlers.WatchedFileHandler(logfile)
+    formatter = logging.Formatter('%(asctime)s %(message)s', "[%d/%m/%Y-%H:%M:%S]")
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr) 
+    logger.setLevel(logging.INFO)
 
 
 def print_log(*args):
-    with print_lock:
-        sys.stderr.write(timestr() + " " + " ".join(imap(str, args)) + "\n")
-        sys.stderr.flush()
+    logger.info(" ".join(imap(str, args)))
+
+def print_warning(message):
+    logger.warning(message)
+
+
+

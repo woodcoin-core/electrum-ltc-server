@@ -1,0 +1,91 @@
+#! /bin/bash
+
+
+electrum_config="/etc/electrum-ltc.conf"
+if [ ! -f $electrum_config ]; then
+    echo "$electrum_config does not exist"
+    echo "please run 'configure'"
+    exit 1
+fi
+
+if ! hash electrum_server.py 2>/dev/null; then
+    echo "electrum_server.py is not installed"
+    echo "Please run 'python setup.py install'"
+    exit 1
+fi
+
+
+
+function read_config()
+{
+    text=$1
+    echo `grep -e ^$text $electrum_config |awk -F\= '{print $2}' | tail -n 1| tr -d ' '`
+}
+
+# read path from config
+path=$(read_config "path")
+# read username
+user=$(read_config "username")
+# log
+logfile=$(read_config "logfile")
+
+if ! [ -f $logfile ]; then
+    touch $logfile
+    chown $user:$user $logfile
+fi
+
+# get PID of server
+if ! PID=`su $user -c "electrum_server.py getpid"`; then
+    PID=""
+fi
+
+case "$1" in
+    start)
+	if [ "$PID" ]; then
+	    echo "Server already running (pid $PID)"
+	    exit
+	fi
+
+	if ! [ "$path" ]; then
+	    echo "Variable path not set in $electrum_config"
+	    exit
+	fi
+
+	echo "Starting server as daemon"
+        su $user -c "ulimit -n 65536; nohup electrum_server.py &"
+	;;
+    stop)
+	if [ ! $PID ]; then
+	    echo "Server not running"
+	else
+            su $user -c "electrum_server.py stop"
+	    echo "Waiting until process $PID terminates..."
+	    while ps -p $PID > /dev/null; do sleep 1; done
+	    echo "Done."
+	fi
+	;;
+    status)
+	if [ ! "$PID" ]; then
+	    echo "Server not running"
+	else
+	    echo "Server running (pid $PID)"
+	fi
+	;;
+    info)
+	if [ ! "$PID" ]; then
+	    echo "Server not running"
+	else
+            su $user -c "electrum_server.py info"
+	fi
+	;;
+    restart)
+	$0 stop
+	$0 start
+	;;
+    *)
+	echo "Usage: electrum-server {start|stop|restart|status|info}"
+	exit 1
+	;;
+esac
+
+exit 0
