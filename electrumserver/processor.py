@@ -62,13 +62,18 @@ class Processor(threading.Thread):
     def run(self):
         while not self.shared.stopped():
             try:
-                request, session = self.queue.get(True, timeout=1)
+                session, request = self.queue.get(True, timeout=1)
+                msg_id = request.get('id')
             except:
                 continue
             try:
-                self.process(request, session)
+                result = self.process(session, request)
+                self.push_response(session, {'id': msg_id, 'result': result})
+            except BaseException, e:
+                self.push_response(session, {'id': msg_id, 'error':str(e)})
             except:
                 logger.error("process error", exc_info=True)
+                self.push_response(session, {'id': msg_id, 'error':'unknown error'})
 
         self.close()
 
