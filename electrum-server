@@ -26,13 +26,6 @@ function read_config()
 path=$(read_config "path")
 # read username
 user=$(read_config "username")
-# log
-logfile=$(read_config "logfile")
-
-if ! [ -f $logfile ]; then
-    touch $logfile
-    chown $user:$user $logfile
-fi
 
 # get PID of server
 if [ `id -u` = 0 ] ; then
@@ -55,6 +48,12 @@ case "$1" in
 	if ! [ "$path" ]; then
 	    echo "Variable path not set in $electrum_config"
 	    exit
+	fi
+
+	logfile=$(read_config "logfile")
+	if ! [ -f $logfile ]; then
+	    touch $logfile
+	    chown $user:$user $logfile
 	fi
 
 	echo "Starting server as daemon"
@@ -87,12 +86,12 @@ case "$1" in
 	    echo "Server running (pid $PID)"
 	fi
 	;;
-    info)
+    info|getpeers|numpeers|numaddresses)
 	if [ ! "$PID" ]; then
 	    echo "Server not running"
 	    exit
 	fi
-        cmd="run_electrum_server info"
+        cmd="run_electrum_server $1"
 	if [ `id -u` = 0 ] ; then
             su $user -c "$cmd"
 	else
@@ -104,7 +103,7 @@ case "$1" in
 	$0 start
 	;;
     *)
-	echo "Usage: electrum-server {start|stop|restart|status|info}"
+	echo "Usage: electrum-server {start|stop|restart|status|info|getpeers|numpeers|numaddresses}"
 	exit 1
 	;;
 esac
