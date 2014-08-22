@@ -77,7 +77,7 @@ code files to the `~/src` directory.
 
     $ sudo adduser litecoin --disabled-password
     $ sudo apt-get install git
-    # su - litecoin
+    $ sudo su - litecoin
     $ mkdir ~/bin ~/src
     $ echo $PATH
 
@@ -85,15 +85,9 @@ If you don't see `/home/litecoin/bin` in the output, you should add this line
 to your `.bashrc`, `.profile`, or `.bash_profile`, then logout and relogin:
 
     PATH="$HOME/bin:$PATH"
+    $ exit
 
-### Step 2. Download and install Electrum
-
-We will download the latest git snapshot for Electrum server:
-
-    $ mkdir -p ~/electrum-server
-    $ git clone https://github.com/pooler/electrum-ltc-server.git electrum-server
-
-### Step 3. Download litecoind
+### Step 2. Download litecoind
 
 Older versions of Electrum used to require a patched version of litecoind. 
 This is not the case anymore since litecoind supports the 'txindex' option.
@@ -101,15 +95,15 @@ We currently recommend litecoind 0.8.7.2 stable.
 
 If you prefer to compile litecoind, here are some pointers for Ubuntu:
 
-    # apt-get install make g++ python-leveldb libboost-all-dev libssl-dev libdb++-dev pkg-config libminiupnpc-dev git
-    # su - litecoin
+    $ sudo apt-get install make g++ python-leveldb libboost-all-dev libssl-dev libdb++-dev pkg-config libminiupnpc-dev
+    $ sudo su - litecoin
     $ cd ~/src && git clone https://github.com/litecoin-project/litecoin.git
     $ cd litecoin/src
     $ make -f makefile.unix
     $ strip litecoind
     $ cp -a ~/src/litecoin/src/litecoind ~/bin/litecoind
 
-### Step 4. Configure and start litecoind
+### Step 3. Configure and start litecoind
 
 In order to allow Electrum to "talk" to `litecoind`, we need to set up an RPC
 username and password for `litecoind`. We will then start `litecoind` and
@@ -147,7 +141,7 @@ You should also set up your system to automatically start litecoind at boot
 time, running as the 'litecoin' user. Check your system documentation to
 find out the best way to do this.
 
-### Step 5. Install Electrum dependencies
+### Step 4. Install Electrum dependencies
 
 Electrum server depends on various standard Python libraries. These will be
 already installed on your distribution, or can be installed with your
@@ -157,7 +151,7 @@ need to install "by hand": `JSONRPClib`.
     $ sudo apt-get install python-setuptools python-openssl
     $ sudo easy_install jsonrpclib
 
-### Step 6. Install leveldb and plyvel
+### Step 5. Install leveldb and plyvel
 
     $ sudo apt-get install python-leveldb libleveldb-dev
     $ sudo easy_install plyvel
@@ -166,6 +160,18 @@ See the steps in README.leveldb for further details, especially if your system
 doesn't have the python-leveldb package or if plyvel installation fails.
 
 leveldb should be at least version 1.9.0. Earlier version are believed to be buggy.
+
+### Step 6. Download and install Electrum Server
+
+We will download the latest git snapshot for Electrum to configure and install it:
+
+    $ cd ~
+    $ git clone https://github.com/pooler/electrum-ltc-server.git
+    $ cd electrum-ltc-server
+    $ sudo configure
+    $ sudo python setup.py install
+
+See the INSTALL file for more information about the configure and install commands. 
 
 ### Step 7. Select your limit
 
@@ -190,11 +196,13 @@ The section in the electrum server configuration file (see step 10) looks like t
 
 ### Step 8. Import blockchain into the database or download it
 
-It's recommended to fetch a pre-processed leveldb from the net.
+It's recommended to fetch a pre-processed leveldb from the net. 
+The "configure" script above will offer you to download a database with pruning limit 100.
 
-You can fetch recent copies of electrum leveldb databases and further instructions 
-from the Electrum full archival server foundry at:
+You can fetch recent copies of electrum leveldb databases with differnt pruning limits 
+and further instructions from the Electrum-LTC full archival server foundry at:
 http://foundry.electrum-ltc.org/leveldb-dump/
+
 
 Alternatively, if you have the time and nerve, you can import the blockchain yourself.
 
@@ -263,27 +271,24 @@ Electrum reads a config file (/etc/electrum-ltc.conf) when starting up. This
 file includes the database setup, litecoind RPC setup, and a few other
 options.
 
-    $ sudo cp ~/electrum-server/electrum.conf.sample /etc/electrum-ltc.conf
-    $ sudo $EDITOR /etc/electrum-ltc.conf
+The "configure" script listed above will create a config file at /etc/electrum-ltc.conf
+which you can edit to modify the settings.
 
-Go through the sample config options and set them to your liking.
+Go through the config options and set them to your liking.
 If you intend to run the server publicly have a look at README-IRC.md
 
 ### Step 11. Tweak your system for running electrum
 
 Electrum server currently needs quite a few file handles to use leveldb. It also requires
 file handles for each connection made to the server. It's good practice to increase the
-open files limit to 16k. This is most easily achived by sticking the value in .bashrc of the
-root user who usually passes this value to all unprivileged user sessions too.
+open files limit to 64k. 
 
-    $ sudo sed -i '$a ulimit -n 16384' /root/.bashrc
+The "configure" script will take care of this and ask you to create a user for running electrum-server.
+If you're using user litecoin to run electrum and have added it manually like shown in this HOWTO run 
+the following code to add the limits to your /etc/security/limits.conf:
 
-Also make sure the litecoin user can actually increase the ulimit by allowing it accordingly in
-/etc/security/limits.conf
-
-While most bugs are fixed in this regard, electrum server may leak some memory and it's good practice 
-to restart the server once in a while from cron (preferred) or to at least monitor 
-it for crashes and then restart the server. Monthly restarts should be fine for most setups.
+     echo "litecoin hard nofile 65536" >> /etc/security/limits.conf
+     echo "litecoin soft nofile 65536" >> /etc/security/limits.conf
 
 Two more things for you to consider:
 
@@ -294,9 +299,12 @@ Two more things for you to consider:
 
 ### Step 12. (Finally!) Run Electrum server
 
-The magic moment has come: you can now start your Electrum server:
+The magic moment has come: you can now start your Electrum server as root (it will su to your unprivileged user):
 
-    $ electrum-server start
+    # electrum-server start
+
+Note: If you want to run the server without installing it on your system, just run 'run_electrum_server" as the
+unprivileged user.
 
 You should see this in the log file:
 
@@ -304,8 +312,15 @@ You should see this in the log file:
 
 If you want to stop Electrum server, use the 'stop' command:
 
-    $ electrum-server stop
+    # electrum-server stop
 
+
+If your system supports it, you may add electrum-server to the /etc/init.d directory. 
+This will ensure that the server is started and stopped automatically, and that the database is closed 
+safely whenever your machine is rebooted.
+
+    # ln -s `which electrum-server` /etc/init.d/electrum-server
+    # update-rc.d electrum-server defaults
 
 ### Step 13. Test the Electrum server
 
