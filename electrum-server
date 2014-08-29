@@ -57,7 +57,7 @@ case "$1" in
 	fi
 
 	echo "Starting server as daemon"
-	cmd="ulimit -n 65536; nohup run_electrum_server &"
+	cmd="ulimit -n 65536; nohup run_electrum_server > /dev/null &"
 	if [ `id -u` = 0 ] ; then
             su $user -c "$cmd"
 	else
@@ -86,7 +86,7 @@ case "$1" in
 	    echo "Server running (pid $PID)"
 	fi
 	;;
-    info|getpeers|numpeers|numaddresses)
+    getinfo|peers|numpeers|sessions|numsessions)
 	if [ ! "$PID" ]; then
 	    echo "Server not running"
 	    exit
@@ -103,7 +103,7 @@ case "$1" in
 	$0 start
 	;;
     *)
-	echo "Usage: electrum-server {start|stop|restart|status|info|getpeers|numpeers|numaddresses}"
+	echo "Usage: electrum-server {start|stop|restart|status|getinfo|peers|numpeers|sessions|numsessions}"
 	exit 1
 	;;
 esac
