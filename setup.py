@@ -1,26 +1,26 @@
 from setuptools import setup
 
 setup(
-    name="electrum-server",
+    name="electrum-ltc-server",
     version="0.9",
-    scripts=['run_electrum_server','electrum-server'],
+    scripts=['run_electrum_ltc_server','electrum-ltc-server'],
     install_requires=['plyvel','jsonrpclib', 'irc'],
     package_dir={
-        'electrumserver':'src'
+        'electrumltcserver':'src'
         },
     py_modules=[
-        'electrumserver.__init__',
-        'electrumserver.utils',
-        'electrumserver.storage',
-        'electrumserver.deserialize',
-        'electrumserver.networks',
-        'electrumserver.blockchain_processor',
-        'electrumserver.server_processor',
-        'electrumserver.processor',
-        'electrumserver.version',
-        'electrumserver.ircthread',
-        'electrumserver.stratum_tcp',
-        'electrumserver.stratum_http'
+        'electrumltcserver.__init__',
+        'electrumltcserver.utils',
+        'electrumltcserver.storage',
+        'electrumltcserver.deserialize',
+        'electrumltcserver.networks',
+        'electrumltcserver.blockchain_processor',
+        'electrumltcserver.server_processor',
+        'electrumltcserver.processor',
+        'electrumltcserver.version',
+        'electrumltcserver.ircthread',
+        'electrumltcserver.stratum_tcp',
+        'electrumltcserver.stratum_http'
     ],
     description="Litecoin Electrum Server",
     author="Thomas Voegtlin",

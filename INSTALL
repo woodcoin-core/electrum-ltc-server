@@ -5,12 +5,12 @@ detailled information on how to configure your server.
 TLDR:
 # sudo configure
 # sudo python setup.py install
-# electrum-server start
-# electrum-server stop
+# electrum-ltc-server start
+# electrum-ltc-server stop
 
 
 Note: If you want to run the server without installing it on your
-system, just run 'run_electrum_server"
+system, just run 'run_electrum_ltc_server"
 
 
 1. Install and run litecoind.
@@ -58,23 +58,23 @@ Note: You will need to redo this everytime you pull code from git.
 4. Using the server
 -------------------
 
-Use 'electrum-server' to start and stop the server:
+Use 'electrum-ltc-server' to start and stop the server:
 
-# electrum-server <start|stop|status|getinfo>
+# electrum-ltc-server <start|stop|status|getinfo>
 
 The server will write a log file in its database path.
 
 
-5. Add electrum-server to your system's services
-------------------------------------------------
+5. Add electrum-ltc-server to your system's services
+----------------------------------------------------
 
-If your system supports it, you may add electrum-server to the
+If your system supports it, you may add electrum-ltc-server to the
 /etc/init.d directory. This will ensure that the server is started and
 stopped automatically, and that the database is closed safely whenever
 your machine is rebooted.
 
-# ln -s `which electrum-server` /etc/init.d/electrum-server
-# update-rc.d electrum-server defaults
+# ln -s `which electrum-ltc-server` /etc/init.d/electrum-ltc-server
+# update-rc.d electrum-ltc-server defaults
 
 
 

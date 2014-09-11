@@ -52,7 +52,7 @@ fi
 
 
 # read path from config
-default_path="/var/electrum-server"
+default_path="/var/electrum-ltc-server"
 path=$(read_config "path")
 if ! [ "$path" ]; then
     read -p "Path for database (default: $default_path) " -r
@@ -124,4 +124,4 @@ fi
 echo "Configuration written to $electrum_config."
 echo "Please edit this file to finish the configuration."
 echo "If you have not done so, please run 'python setup.py install'"
-echo "Then, run 'electrum-server' to start the daemon"
+echo "Then, run 'electrum-ltc-server' to start the daemon"

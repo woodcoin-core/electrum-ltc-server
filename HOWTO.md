@@ -279,7 +279,7 @@ Electrum server currently needs quite a few file handles to use leveldb. It also
 file handles for each connection made to the server. It's good practice to increase the
 open files limit to 64k. 
 
-The "configure" script will take care of this and ask you to create a user for running electrum-server.
+The "configure" script will take care of this and ask you to create a user for running electrum-ltc-server.
 If you're using user litecoin to run electrum and have added it manually like shown in this HOWTO run 
 the following code to add the limits to your /etc/security/limits.conf:
 
@@ -290,16 +290,16 @@ Two more things for you to consider:
 
 1. To increase security you may want to close litecoind for incoming connections and connect outbound only
 
-2. Consider restarting litecoind (together with electrum-server) on a weekly basis to clear out unconfirmed
+2. Consider restarting litecoind (together with electrum-ltc-server) on a weekly basis to clear out unconfirmed
    transactions from the local the memory pool which did not propagate over the network.
 
 ### Step 11. (Finally!) Run Electrum server
 
 The magic moment has come: you can now start your Electrum server as root (it will su to your unprivileged user):
 
-    # electrum-server start
+    # electrum-ltc-server start
 
-Note: If you want to run the server without installing it on your system, just run 'run_electrum_server" as the
+Note: If you want to run the server without installing it on your system, just run 'run_electrum_ltc_server" as the
 unprivileged user.
 
 You should see this in the log file:
@@ -308,15 +308,15 @@ You should see this in the log file:
 
 If you want to stop Electrum server, use the 'stop' command:
 
-    # electrum-server stop
+    # electrum-ltc-server stop
 
 
-If your system supports it, you may add electrum-server to the /etc/init.d directory. 
+If your system supports it, you may add electrum-ltc-server to the /etc/init.d directory. 
 This will ensure that the server is started and stopped automatically, and that the database is closed 
 safely whenever your machine is rebooted.
 
-    # ln -s `which electrum-server` /etc/init.d/electrum-server
-    # update-rc.d electrum-server defaults
+    # ln -s `which electrum-ltc-server` /etc/init.d/electrum-ltc-server
+    # update-rc.d electrum-ltc-server defaults
 
 ### Step 12. Test the Electrum server
 
