@@ -25,7 +25,7 @@ litecoin user has sudo rights, so we use '$ sudo command' when we need to.
 
 Strings that are surrounded by "lower than" and "greater than" ( < and > )
 should be replaced by the user with something appropriate. For example,
-<password> should be replaced by a user chosen password. Do not confuse this
+\<password\> should be replaced by a user chosen password. Do not confuse this
 notation with shell redirection ('command < file' or 'command > file')!
 
 Lines that lack hash or dollar signs are pastes from config files. They
@@ -91,7 +91,7 @@ to your `.bashrc`, `.profile`, or `.bash_profile`, then logout and relogin:
 
 Older versions of Electrum used to require a patched version of litecoind. 
 This is not the case anymore since litecoind supports the 'txindex' option.
-We currently recommend litecoind 0.8.7.2 stable.
+We currently recommend litecoind 0.8.7.4 stable.
 
 If you prefer to compile litecoind, here are some pointers for Ubuntu:
 
