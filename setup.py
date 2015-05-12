@@ -4,7 +4,7 @@ setup(
     name="electrum-ltc-server",
     version="0.9",
     scripts=['run_electrum_ltc_server','electrum-ltc-server'],
-    install_requires=['plyvel','jsonrpclib', 'irc'],
+    install_requires=['plyvel','jsonrpclib', 'irc>=11'],
     package_dir={
         'electrumltcserver':'src'
         },

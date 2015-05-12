@@ -50,7 +50,7 @@ issue so you can continue following this howto.
 **Software.** A recent Linux 64-bit distribution with the following software
 installed: `python`, `easy_install`, `git`, standard C/C++
 build chain. You will need root access in order to install other software or
-Python libraries. 
+Python libraries. Python 2.7 is the minimum supported version.
 
 **Hardware.** The lightest setup is a pruning server with diskspace 
 requirements of about 4 GB for the electrum database. However note that 
@@ -89,19 +89,19 @@ to your `.bashrc`, `.profile`, or `.bash_profile`, then logout and relogin:
 
 ### Step 2. Download litecoind
 
-Older versions of Electrum used to require a patched version of litecoind. 
-This is not the case anymore since litecoind supports the 'txindex' option.
-We currently recommend litecoind 0.8.7.4 stable.
+We currently recommend litecoind 0.10.1.3 or 0.8.7.5 stable.
 
 If you prefer to compile litecoind, here are some pointers for Ubuntu:
 
-    $ sudo apt-get install make g++ python-leveldb libboost-all-dev libssl-dev libdb++-dev pkg-config libminiupnpc-dev
+    $ sudo apt-get install make g++ python-leveldb libboost-all-dev libssl-dev libdb++-dev pkg-config automake libtool
     $ sudo su - litecoin
-    $ cd ~/src && git clone https://github.com/litecoin-project/litecoin.git
-    $ cd litecoin/src
-    $ make -f makefile.unix
-    $ strip litecoind
-    $ cp -a ~/src/litecoin/src/litecoind ~/bin/litecoind
+    $ cd ~/src && git clone https://github.com/litecoin-project/litecoin.git -b master-0.10
+    $ cd litecoin
+    $ ./autogen.sh
+    $ ./configure --disable-wallet --without-miniupnpc
+    $ make
+    $ strip src/litecoind src/litecoin-cli src/litecoin-tx
+    $ cp -a src/litecoind src/litecoin-cli src/litecoin-tx ~/bin
 
 ### Step 3. Configure and start litecoind
 
@@ -126,17 +126,17 @@ set txindex=1 you need to reindex the blockchain by running
 
     $ litecoind -reindex
 
-If you have a fresh copy of litecoind start `litecoind`:
+If you already have a freshly indexed copy of the blockchain with txindex start `litecoind`:
 
     $ litecoind
 
 Allow some time to pass, so `litecoind` connects to the network and starts
 downloading blocks. You can check its progress by running:
 
-    $ litecoind getinfo
+    $ litecoin-cli getinfo
 
 Before starting the electrum server your litecoind should have processed all
-blockes and caught up to the current height of the network.
+blocks and caught up to the current height of the network (not just the headers).
 You should also set up your system to automatically start litecoind at boot
 time, running as the 'litecoin' user. Check your system documentation to
 find out the best way to do this.
