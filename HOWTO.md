@@ -89,7 +89,7 @@ to your `.bashrc`, `.profile`, or `.bash_profile`, then logout and relogin:
 
 ### Step 2. Download litecoind
 
-We currently recommend litecoind 0.10.1.3 or 0.8.7.5 stable.
+We currently recommend litecoind 0.10.2.2 stable.
 
 If you prefer to compile litecoind, here are some pointers for Ubuntu:
 
