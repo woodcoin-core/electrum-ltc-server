@@ -20,8 +20,7 @@ You will need to run litecoind with the config option txindex=1. If you
 have not previously done so, you may need to reindex the litecoind
 blockchain
 
-Note: you cannot use a ultra-pruning litecoind (forthcoming in 0.9 or
-later).  A full litecoin node is required in order to know for each
+Note: you cannot use a pruning litecoind (possible since 0.11).  A full litecoin node is required in order to know for each
 address if it has been used. Pruning occurs only at the level of the
 Electrum database.
 

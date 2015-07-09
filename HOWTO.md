@@ -55,7 +55,7 @@ Python libraries. Python 2.7 is the minimum supported version.
 **Hardware.** The lightest setup is a pruning server with diskspace 
 requirements of about 4 GB for the electrum database. However note that 
 you also need to run litecoind and keep a copy of the full blockchain, 
-which is roughly 4 GB in April 2014. If you have less than 2 GB of RAM 
+which is roughly 4 GB in July 2015. If you have less than 2 GB of RAM 
 make sure you limit litecoind to 8 concurrent connections. If you have more 
 resources to spare you can run the server with a higher limit of historic
 transactions per address. CPU speed is important for the initial block
