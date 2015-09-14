@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name="electrum-ltc-server",
     version="1.0",
-    scripts=['run_electrum_ltc_server','electrum-ltc-server'],
+    scripts=['run_electrum_ltc_server.py','electrum-ltc-server'],
     install_requires=['plyvel','jsonrpclib', 'irc>=11'],
     package_dir={
         'electrumltcserver':'src'
