@@ -21,19 +21,19 @@ In this document, lines starting with a hash sign (#) or a dollar sign ($)
 contain commands. Commands starting with a hash should be run as root,
 commands starting with a dollar should be run as a normal user (in this
 document, we assume that user is called 'litecoin'). We also assume the
-litecoin user has sudo rights, so we use '$ sudo command' when we need to.
+litecoin user has sudo rights, so we use `$ sudo command` when we need to.
 
 Strings that are surrounded by "lower than" and "greater than" ( < and > )
 should be replaced by the user with something appropriate. For example,
 \<password\> should be replaced by a user chosen password. Do not confuse this
-notation with shell redirection ('command < file' or 'command > file')!
+notation with shell redirection (`command < file` or `command > file`)!
 
 Lines that lack hash or dollar signs are pastes from config files. They
 should be copied verbatim or adapted without the indentation tab.
 
-apt-get install commands are suggestions for required dependencies.
+`apt-get install` commands are suggestions for required dependencies.
 They conform to an Ubuntu 13.10 system but may well work with Debian
-or earlier and later versions of Ubuntu.
+or other versions of Ubuntu.
 
 Prerequisites
 -------------
@@ -52,17 +52,17 @@ installed: `python`, `easy_install`, `git`, standard C/C++
 build chain. You will need root access in order to install other software or
 Python libraries. Python 2.7 is the minimum supported version.
 
-**Hardware.** The lightest setup is a pruning server with diskspace 
-requirements of about 4 GB for the electrum database. However note that 
-you also need to run litecoind and keep a copy of the full blockchain, 
-which is roughly 4 GB in July 2015. If you have less than 2 GB of RAM 
-make sure you limit litecoind to 8 concurrent connections. If you have more 
+**Hardware.** The lightest setup is a pruning server with diskspace
+requirements of about 4 GB for the Electrum database. However note that
+you also need to run litecoind and keep a copy of the full blockchain,
+which is roughly 4 GB in July 2015. If you have less than 2 GB of RAM
+make sure you limit litecoind to 8 concurrent connections. If you have more
 resources to spare you can run the server with a higher limit of historic
 transactions per address. CPU speed is important for the initial block
-chain import, but is also important if you plan to run a public Electrum server, 
+chain import, but is also important if you plan to run a public Electrum server,
 which could serve tens of concurrent requests. Any multi-core x86 CPU from 2009 or
 newer other than an Atom should do for good performance. An ideal setup
-has enough RAM to hold and process the leveldb database in tmpfs (e.g. /dev/shm).
+has enough RAM to hold and process the leveldb database in tmpfs (e.g. `/dev/shm`).
 
 Instructions
 ------------
@@ -89,7 +89,7 @@ to your `.bashrc`, `.profile`, or `.bash_profile`, then logout and relogin:
 
 ### Step 2. Download litecoind
 
-We currently recommend litecoind 0.10.2.2 stable.
+We currently recommend litecoind 0.10.4.0 stable.
 
 If you prefer to compile litecoind, here are some pointers for Ubuntu:
 
@@ -135,13 +135,13 @@ downloading blocks. You can check its progress by running:
 
     $ litecoin-cli getinfo
 
-Before starting the electrum server your litecoind should have processed all
+Before starting the Electrum server your litecoind should have processed all
 blocks and caught up to the current height of the network (not just the headers).
 You should also set up your system to automatically start litecoind at boot
 time, running as the 'litecoin' user. Check your system documentation to
 find out the best way to do this.
 
-### Step 4. Download and install Electrum Server
+### Step 4. Download and install Electrum server
 
 We will download the latest git snapshot for Electrum to configure and install it:
 
@@ -151,18 +151,18 @@ We will download the latest git snapshot for Electrum to configure and install i
     $ sudo configure
     $ sudo python setup.py install
 
-See the INSTALL file for more information about the configure and install commands. 
+See the INSTALL file for more information about the configure and install commands.
 
 ### Optional Step 5: Install Electrum dependencies manually
 
 Electrum server depends on various standard Python libraries and leveldb. These will usually be
-installed by caling "python setup.py install" above. They can be also be installed with your
-package manager if you don't want to use the install routine
+installed by calling `python setup.py install` above. They can be also be installed with your
+package manager if you don't want to use the install routine.
 
-    $ sudo apt-get install python-setuptools python-openssl python-leveldb libleveldb-dev 
+    $ sudo apt-get install python-setuptools python-openssl python-leveldb libleveldb-dev
     $ sudo easy_install jsonrpclib irc plyvel
 
-Regarding leveldb see the steps in README.leveldb for further details, especially if your system
+Regarding leveldb, see the steps in README.leveldb for further details, especially if your system
 doesn't have the python-leveldb package or if plyvel installation fails.
 
 leveldb should be at least version 1.9.0. Earlier version are believed to be buggy.
@@ -190,10 +190,10 @@ The section in the electrum server configuration file (see step 10) looks like t
 
 ### Step 7. Import blockchain into the database or download it
 
-It's recommended to fetch a pre-processed leveldb from the net. 
+It's recommended that you fetch a pre-processed leveldb from the net.
 The "configure" script above will offer you to download a database with pruning limit 100.
 
-You can fetch recent copies of electrum leveldb databases with differnt pruning limits 
+You can fetch recent copies of electrum leveldb databases with different pruning limits
 and further instructions from the Electrum-LTC full archival server foundry at:
 http://foundry.electrum-ltc.org/leveldb-dump/
 
@@ -208,15 +208,15 @@ or create a tmpfs which will also use swap if you run out of memory:
 
     $ sudo mount -t tmpfs -o rw,nodev,nosuid,noatime,size=15000M,mode=0777 none /tmpfs
 
-If you use tmpfs make sure you have enough RAM and swap to cover the size. If you only have 2 gigs of
-RAM but add 15 gigs of swap from a file that's fine too. tmpfs is rather smart to swap out the least
+If you use tmpfs make sure you have enough RAM and swap to cover the size. If you only have 2 GB of
+RAM but add 15 GB of swap from a file that's fine too; tmpfs is smart enough to swap out the least
 used parts. It's fine to use a file on an SSD for swap in this case.
 
 It's not recommended to do initial indexing of the database on a SSD because the indexing process
 does at least 10 TB (!) of disk writes and puts considerable wear-and-tear on an SSD. It's a lot better
 to use tmpfs and just swap out to disk when necessary.   
 
-Databases have grown to roughly 4 GB in April 2014, give or take a gigabyte between pruning limits 
+Databases have grown to roughly 4 GB in April 2014, give or take a gigabyte, between pruning limits
 100 and 10000. Leveldb prunes the database from time to time, so it's not uncommon to see databases
 ~50% larger at times when it's writing a lot, especially when indexing from the beginning.
 
@@ -225,11 +225,11 @@ Databases have grown to roughly 4 GB in April 2014, give or take a gigabyte betw
 
 [Note: SSL certificates signed by a CA are supported by 2.0 clients.]
 
-To run SSL / HTTPS you need to generate a self-signed certificateusing openssl. 
+To run SSL / HTTPS you need to generate a self-signed certificate using openssl.
 You could just comment out the SSL / HTTPS ports in the config and run
 without, but this is not recommended.
 
-Use the sample code below to create a self-signed cert with a recommended validity 
+Use the sample code below to create a self-signed cert with a recommended validity
 of 5 years. You may supply any information for your sign request to identify your server.
 They are not currently checked by the client except for the validity date.
 When asked for a challenge password just leave it empty and press enter.
@@ -249,17 +249,17 @@ When asked for a challenge password just leave it empty and press enter.
 
     $ openssl x509 -req -days 1825 -in server.csr -signkey server.key -out server.crt
 
-The server.crt file is your certificate suitable for the ssl_certfile= parameter and
-server.key corresponds to ssl_keyfile= in your electrum server config.
+The server.crt file is your certificate suitable for the `ssl_certfile=` parameter and
+server.key corresponds to `ssl_keyfile=` in your Electrum server config.
 
-Starting with Electrum 1.9, the client will learn and locally cache the SSL certificate 
+Starting with Electrum 1.9, the client will learn and locally cache the SSL certificate
 for your server upon the first request to prevent man-in-the middle attacks for all
 further connections.
 
 If your certificate is lost or expires on the server side, you will need to run
 your server with a different server name and a new certificate.
 Therefore it's a good idea to make an offline backup copy of your certificate and key
-in case you need to restore it.
+in case you need to restore them.
 
 ### Step 9. Configure Electrum server
 
@@ -277,20 +277,20 @@ If you intend to run the server publicly have a look at README-IRC.md
 
 Electrum server currently needs quite a few file handles to use leveldb. It also requires
 file handles for each connection made to the server. It's good practice to increase the
-open files limit to 64k. 
+open files limit to 64k.
 
 The "configure" script will take care of this and ask you to create a user for running electrum-ltc-server.
-If you're using user litecoin to run electrum and have added it manually like shown in this HOWTO run 
+If you're using the user `litecoin` to run electrum and have added it as shown in this document, run
 the following code to add the limits to your /etc/security/limits.conf:
 
      echo "litecoin hard nofile 65536" >> /etc/security/limits.conf
      echo "litecoin soft nofile 65536" >> /etc/security/limits.conf
 
-If you are on Debian > 8.0 Jessie or other distribution based on it, you also need to add these lines in /etc/pam.d/common-session and /etc/pam.d/common-session-noninteractive otherwise the limits in /etc/security/limits.conf will not work:
+If you are on Debian > 8.0 Jessie or another distribution based on it, you also need to add these lines in /etc/pam.d/common-session and /etc/pam.d/common-session-noninteractive otherwise the limits in /etc/security/limits.conf will not work:
 
     echo "session required pam_limits.so" >> /etc/pam.d/common-session
     echo "session required pam_limits.so" >> /etc/pam.d/common-session-noninteractive
-    
+
 Check if the limits are changed either by logging with the user configured to run Electrum server as. Example:
 
     su - litecoin
@@ -326,8 +326,8 @@ If you want to stop Electrum server, use the 'stop' command:
     # electrum-ltc-server stop
 
 
-If your system supports it, you may add electrum-ltc-server to the /etc/init.d directory. 
-This will ensure that the server is started and stopped automatically, and that the database is closed 
+If your system supports it, you may add electrum-ltc-server to the /etc/init.d directory.
+This will ensure that the server is started and stopped automatically, and that the database is closed
 safely whenever your machine is rebooted.
 
     # ln -s `which electrum-ltc-server` /etc/init.d/electrum-ltc-server
@@ -336,14 +336,14 @@ safely whenever your machine is rebooted.
 ### Step 12. Test the Electrum server
 
 We will assume you have a working Electrum client, a wallet, and some
-transactions history. You should start the client and click on the green
+transaction history. You should start the client and click on the green
 checkmark (last button on the right of the status bar) to open the Server
 selection window. If your server is public, you should see it in the list
 and you can select it. If you server is private, you need to enter its IP
 or hostname and the port. Press 'Ok' and the client will disconnect from the
 current server and connect to your new Electrum server. You should see your
 addresses and transactions history. You can see the number of blocks and
-response time in the Server selection window. You should send/receive some
+response time in the server selection window. You should send/receive some
 litecoins to confirm that everything is working properly.
 
 ### Step 13. Join us on IRC, subscribe to the server thread
