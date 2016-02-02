@@ -53,9 +53,9 @@ build chain. You will need root access in order to install other software or
 Python libraries. Python 2.7 is the minimum supported version.
 
 **Hardware.** The lightest setup is a pruning server with diskspace
-requirements of about 4 GB for the Electrum database. However note that
+requirements of about 5 GB for the Electrum database (February 2016). However note that
 you also need to run litecoind and keep a copy of the full blockchain,
-which is roughly 4 GB in July 2015. If you have less than 2 GB of RAM
+which is roughly 6 GB (February 2016). If you have less than 2 GB of RAM
 make sure you limit litecoind to 8 concurrent connections. If you have more
 resources to spare you can run the server with a higher limit of historic
 transactions per address. CPU speed is important for the initial block
@@ -216,9 +216,9 @@ It's not recommended to do initial indexing of the database on a SSD because the
 does at least 10 TB (!) of disk writes and puts considerable wear-and-tear on an SSD. It's a lot better
 to use tmpfs and just swap out to disk when necessary.   
 
-Databases have grown to roughly 4 GB in April 2014, give or take a gigabyte, between pruning limits
-100 and 10000. Leveldb prunes the database from time to time, so it's not uncommon to see databases
-~50% larger at times when it's writing a lot, especially when indexing from the beginning.
+Databases have grown to roughly 5 GB as of February 2016. Leveldb prunes the database from time to time,
+so it's not uncommon to see databases ~50% larger at times when it's writing a lot, especially when
+indexing from the beginning.
 
 
 ### Step 8. Create a self-signed SSL cert
