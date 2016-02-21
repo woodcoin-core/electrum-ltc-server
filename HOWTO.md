@@ -32,7 +32,7 @@ Lines that lack hash or dollar signs are pastes from config files. They
 should be copied verbatim or adapted without the indentation tab.
 
 `apt-get install` commands are suggestions for required dependencies.
-They conform to an Ubuntu 13.10 system but may well work with Debian
+They conform to an Ubuntu 14.10 system but may well work with Debian
 or other versions of Ubuntu.
 
 Prerequisites
@@ -55,14 +55,18 @@ Python libraries. Python 2.7 is the minimum supported version.
 **Hardware.** The lightest setup is a pruning server with diskspace
 requirements of about 5 GB for the Electrum database (February 2016). However note that
 you also need to run litecoind and keep a copy of the full blockchain,
-which is roughly 6 GB (February 2016). If you have less than 2 GB of RAM
-make sure you limit litecoind to 8 concurrent connections. If you have more
-resources to spare you can run the server with a higher limit of historic
-transactions per address. CPU speed is important for the initial block
-chain import, but is also important if you plan to run a public Electrum server,
-which could serve tens of concurrent requests. Any multi-core x86 CPU from 2009 or
-newer other than an Atom should do for good performance. An ideal setup
-has enough RAM to hold and process the leveldb database in tmpfs (e.g. `/dev/shm`).
+which is roughly 6 GB (February 2016). Ideally you have a machine with 4 GB of RAM
+and an equal amount of swap. If you have ~2 GB of RAM make sure you limit litecoind 
+to 8 concurrent connections by disabling incoming connections. electrum-ltc-server may
+bail-out on you from time to time with less than 2 GB of RAM, so you might have to 
+monitor the process and restart it. You can tweak cache sizes in the config to an extend
+but most RAM will be used to process blocks and catch-up on initial start.
+
+CPU speed is less important than fast I/O speed. electrum-ltc-server makes uses of one core 
+only leaving spare cycles for bitcoind. Fast single core CPU power helps for the initial 
+block chain import. Any multi-core x86 CPU with CPU Mark / PassMark > 1500 will work
+(see https://www.cpubenchmark.net/). An ideal setup in February 2016 has 4 GB+ RAM and
+SSD for good i/o speed.
 
 Instructions
 ------------
@@ -303,7 +307,9 @@ Or if you use sudo and the user is added to sudoers group:
 
 Two more things for you to consider:
 
-1. To increase security you may want to close litecoind for incoming connections and connect outbound only
+1. To increase privacy of transactions going through your server
+   you may want to close litecoind for incoming connections and connect outbound only. Most servers do run
+   full nodes with open incoming connections though.
 
 2. Consider restarting litecoind (together with electrum-ltc-server) on a weekly basis to clear out unconfirmed
    transactions from the local the memory pool which did not propagate over the network.
@@ -320,6 +326,12 @@ unprivileged user.
 You should see this in the log file:
 
     starting Electrum server
+
+If your blockchain database is out of date Electrum Server will start updating it. You will see something similar to this in the log file:
+
+    [09/02/2016-09:58:18] block 397319 (1727 197.37s) 0290aae5dc6395e2c60e8b2c9e48a7ee246cad7d0630d17dd5b54d70a41ffed7 (10.13tx/s, 139.78s/block) (eta 11.5 hours, 240 blocks)
+    
+The important pieces to you are at the end. In this example, the server has to calculate 240 more blocks, with an ETA of 11.5 hours. Multiple entries will appear below this one as the server catches back up to the latest block. During this time the server will not accept incoming connections from clients or connect to the IRC channel.
 
 If you want to stop Electrum server, use the 'stop' command:
 
