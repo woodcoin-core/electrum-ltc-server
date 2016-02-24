@@ -32,7 +32,7 @@ Lines that lack hash or dollar signs are pastes from config files. They
 should be copied verbatim or adapted without the indentation tab.
 
 `apt-get install` commands are suggestions for required dependencies.
-They conform to an Ubuntu 14.10 system but may well work with Debian
+They conform to an Ubuntu 15.10 system but may well work with Debian
 or other versions of Ubuntu.
 
 Prerequisites

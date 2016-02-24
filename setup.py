@@ -24,10 +24,8 @@ setup(
     ],
     description="Litecoin Electrum Server",
     author="Thomas Voegtlin",
-    author_email="thomasv1@gmx.de",
-    license="GNU Affero GPLv3",
+    author_email="thomasv@electrum.org",
+    license="MIT Licence",
     url="https://github.com/pooler/electrum-ltc-server/",
     long_description="""Server for the Electrum Lightweight Litecoin Wallet"""
 )
-
-
