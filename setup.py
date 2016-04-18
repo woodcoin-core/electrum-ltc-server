@@ -19,8 +19,7 @@ setup(
         'electrumltcserver.processor',
         'electrumltcserver.version',
         'electrumltcserver.ircthread',
-        'electrumltcserver.stratum_tcp',
-        'electrumltcserver.stratum_http'
+        'electrumltcserver.stratum_tcp'
     ],
     description="Litecoin Electrum Server",
     author="Thomas Voegtlin",
