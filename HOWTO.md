@@ -153,7 +153,7 @@ We will download the latest git snapshot for Electrum to configure and install i
     $ git clone https://github.com/pooler/electrum-ltc-server.git
     $ cd electrum-ltc-server
     $ sudo apt-get install python-setuptools
-    $ sudo configure
+    $ sudo ./configure
     $ sudo python setup.py install
 
 See the INSTALL file for more information about the configure and install commands.
