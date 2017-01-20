@@ -59,7 +59,7 @@ Note: You will need to redo this everytime you pull code from git.
 
 Use 'electrum-ltc-server' to start and stop the server:
 
-$ electrum-ltc-server <start|stop|status|getinfo>
+$ electrum-ltc-server <start|stop|restart|status|getinfo|peers|numpeers|sessions|numsessions|banner_update>
 
 The server will write a log file in its database path.
 

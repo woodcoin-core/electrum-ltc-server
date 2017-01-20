@@ -52,10 +52,10 @@ installed: `python`, `easy_install`, `git`, standard C/C++
 build chain. You will need root access in order to install other software or
 Python libraries. Python 2.7 is the minimum supported version.
 
-**Hardware.** The lightest setup is a pruning server with diskspace
-requirements of about 5 GB for the Electrum database (February 2016). However note that
+**Hardware.** The lightest setup is a pruning server with disk space
+requirements of about 5 GB for the Electrum database (January 2017). However note that
 you also need to run litecoind and keep a copy of the full blockchain,
-which is roughly 6 GB (February 2016). Ideally you have a machine with 4 GB of RAM
+which is roughly 7 GB (January 2017). Ideally you have a machine with 4 GB of RAM
 and an equal amount of swap. If you have ~2 GB of RAM make sure you limit litecoind 
 to 8 concurrent connections by disabling incoming connections. electrum-ltc-server may
 bail-out on you from time to time with less than 2 GB of RAM, so you might have to 
@@ -63,7 +63,7 @@ monitor the process and restart it. You can tweak cache sizes in the config to a
 but most RAM will be used to process blocks and catch-up on initial start.
 
 CPU speed is less important than fast I/O speed. electrum-ltc-server makes use of one core 
-only leaving spare cycles for bitcoind. Fast single core CPU power helps for the initial 
+only leaving spare cycles for litecoind. Fast single core CPU power helps for the initial 
 block chain import. Any multi-core x86 CPU with CPU Mark / PassMark > 1500 will work
 (see https://www.cpubenchmark.net/). An ideal setup in February 2016 has 4 GB+ RAM and
 SSD for good i/o speed.
@@ -93,14 +93,15 @@ to your `.bashrc`, `.profile`, or `.bash_profile`, then logout and relogin:
 
 ### Step 2. Download litecoind
 
-We currently recommend litecoind 0.10.4.0 stable.
+We currently recommend litecoin core 0.13.2.1 stable.
 
-If you prefer to compile litecoind, here are some pointers for Ubuntu:
+If you prefer to compile litecoind yourself, here are some pointers for Ubuntu:
 
-    $ sudo apt-get install make g++ python-leveldb libboost-all-dev libssl-dev libdb++-dev pkg-config automake libtool
+    $ sudo apt-get install automake make bsdmainutils g++ python-leveldb libboost-all-dev libssl-dev libdb++-dev pkg-config libevent-dev
     $ sudo su - litecoin
-    $ cd ~/src && git clone https://github.com/litecoin-project/litecoin.git -b master-0.10
+    $ cd ~/src && git clone https://github.com/litecoin-project/litecoin.git -b master
     $ cd litecoin
+    $ git checkout v0.13.2.1
     $ ./autogen.sh
     $ ./configure --disable-wallet --without-miniupnpc
     $ make
@@ -118,12 +119,13 @@ wait for it to complete downloading the blockchain.
 
 Write this in `litecoin.conf`:
 
-    rpcuser=<rpc-username>
-    rpcpassword=<rpc-password>
     daemon=1
     txindex=1
     disablewallet=1
 
+rpcuser / rpcpassword options are only needed for non-localhost connections.
+you can consider setting maxconnections if you want to reduce litecoind bandwidth
+(as stated above)
 
 If you have an existing installation of litecoind and have not previously
 set txindex=1 you need to reindex the blockchain by running
@@ -188,7 +190,7 @@ deprecated.
 
 The pruning server uses leveldb and keeps a smaller and
 faster database by pruning spent transactions. It's a lot quicker to get up
-and running and requires less maintenance and diskspace than abe.
+and running and requires less maintenance and disk space than abe.
 
 The section in the electrum server configuration file (see step 10) looks like this:
 
@@ -286,14 +288,14 @@ If you intend to run the server publicly have a look at README-IRC.md
 
 Electrum server currently needs quite a few file handles to use leveldb. It also requires
 file handles for each connection made to the server. It's good practice to increase the
-open files limit to 64k.
+open files limit to 128k.
 
 The "configure" script will take care of this and ask you to create a user for running electrum-ltc-server.
 If you're using the user `litecoin` to run electrum and have added it as shown in this document, run
 the following code to add the limits to your /etc/security/limits.conf:
 
-     echo "litecoin hard nofile 65536" >> /etc/security/limits.conf
-     echo "litecoin soft nofile 65536" >> /etc/security/limits.conf
+     echo "litecoin hard nofile 131072" >> /etc/security/limits.conf
+     echo "litecoin soft nofile 131072" >> /etc/security/limits.conf
 
 If you are on Debian > 8.0 Jessie or another distribution based on it, you also need to add these lines in /etc/pam.d/common-session and /etc/pam.d/common-session-noninteractive otherwise the limits in /etc/security/limits.conf will not work:
 
