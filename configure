@@ -12,7 +12,7 @@ fi
 source_dir=$(cd "$(dirname "${BASH_SOURCE[0]}" )"; pwd)
 
 
-electrum_config="/etc/electrum-ltc.conf"
+electrum_config="/etc/electrum-wdc.conf"
 function read_config()
 {
     text=$1
@@ -26,7 +26,7 @@ function write_config()
 # create config file
 if [ ! -f $electrum_config ]; then
     echo "Creating config file"
-    cp $source_dir"/electrum-ltc.conf.sample" $electrum_config
+    cp $source_dir"/electrum-wdc.conf.sample" $electrum_config
 fi
 
 
@@ -92,6 +92,7 @@ if [ ! -d $path ]; then
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
 	mkdir -p $path
+	# This obviously needs changed
 	wget -O - "http://foundry.electrum-ltc.org/leveldb-dump/electrum-fulltree-100-latest.tar.gz" | tar --extract --gunzip --strip-components 1 --directory $path --file -
     fi
 fi
@@ -107,16 +108,16 @@ if ! [ -f $logfile ]; then
 fi
 chown $user:$user $logfile
 
-
+# this and the .conf need bitcoind switched to woodcoind
 bitcoind_user=$(read_config "bitcoind_user")
 if ! [ "$bitcoind_user" ]; then
-    read -p "rpcuser (from your litecoin.conf file, leave empty for localhost): " -r
+    read -p "rpcuser (from your woodcoin.conf file, leave empty for localhost): " -r
     write_config "bitcoind_user" $REPLY
 fi
 
 bitcoind_password=$(read_config "bitcoind_password")
 if ! [ "$bitcoind_password" ]; then
-    read -p "rpcpassword (from your litecoin.conf file, leave emtpy for localhost): " -r
+    read -p "rpcpassword (from your woodcoin.conf file, leave emtpy for localhost): " -r
     write_config "bitcoind_password" $REPLY
 fi
 
@@ -125,4 +126,4 @@ fi
 echo "Configuration written to $electrum_config."
 echo "Please edit this file to finish the configuration."
 echo "If you have not done so, please run 'python setup.py install'"
-echo "Then, run 'electrum-ltc-server' to start the daemon"
+echo "Then, run 'electrum-wdc-server' to start the daemon"
