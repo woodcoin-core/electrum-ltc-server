@@ -34,7 +34,7 @@ import imp
 
 
 if os.path.dirname(os.path.realpath(__file__)) == os.getcwd():
-    imp.load_module('electrumltcserver', *imp.find_module('src'))
+    imp.load_module('electrumwdcserver', *imp.find_module('src'))
 
 from electrumltcserver import storage, networks, utils
 from electrumltcserver.processor import Dispatcher, print_log
@@ -46,11 +46,11 @@ from electrumltcserver.stratum_tcp import TcpServer
 logging.basicConfig()
 
 if sys.maxsize <= 2**32:
-    print "Warning: it looks like you are using a 32bit system. You may experience crashes caused by mmap"
+    print("Warning: it looks like you are using a 32bit system. You may experience crashes caused by mmap")
 
 if os.getuid() == 0:
-    print "Do not run this program as root!"
-    print "Run the install script to create a non-privileged user."
+    print("Do not run this program as root!")
+    print("Run the install script to create a non-privileged user.")
     sys.exit()
 
 def attempt_read_config(config, filename):
@@ -85,8 +85,8 @@ def create_config(filename=None):
     config = ConfigParser.ConfigParser()
     # set some defaults, which will be overwritten by the config file
     config.add_section('server')
-    config.set('server', 'banner', 'Welcome to Electrum!')
-    config.set('server', 'banner_file', '/etc/electrum-ltc.banner')
+    config.set('server', 'banner', 'Welcome to Woodcoin!')
+    config.set('server', 'banner_file', '/etc/electrum-wdc.banner')
     config.set('server', 'host', 'localhost')
     config.set('server', 'electrum_rpc_port', '8000')
     config.set('server', 'report_host', '')
@@ -98,12 +98,12 @@ def create_config(filename=None):
     config.set('server', 'ssl_keyfile', '')
     config.set('server', 'irc', 'no')
     config.set('server', 'irc_nick', '')
-    config.set('server', 'coin', 'litecoin')
+    config.set('server', 'coin', 'woodcoin')
     config.set('server', 'donation_address', '')
     config.set('server', 'max_subscriptions', '10000')
 
     config.add_section('leveldb')
-    config.set('leveldb', 'path', '/dev/shm/electrum-ltc_db')
+    config.set('leveldb', 'path', '/dev/shm/electrum-wdc_db')
     config.set('leveldb', 'pruning_limit', '100')
     config.set('leveldb', 'reorg_limit', '100')
     config.set('leveldb', 'utxo_cache', str(64*1024*1024))
@@ -113,12 +113,12 @@ def create_config(filename=None):
 
     # set network parameters
     config.add_section('network')
-    config.set('network', 'type', 'litecoin_main')
+    config.set('network', 'type', 'woodcoin_main')
 
     # try to find the config file in the default paths
     if not filename:
         for path in ('/etc/', ''):
-            filename = path + 'electrum-ltc.conf'
+            filename = path + 'electrum-wdc.conf'
             if os.path.isfile(filename):
                 break
 
@@ -290,7 +290,7 @@ if __name__ == '__main__':
         try:
             run_rpc_command(args.command, electrum_rpc_port)
         except socket.error:
-            print "server not running"
+            print("server not running")
             sys.exit(1)
         sys.exit(0)
 
@@ -301,7 +301,7 @@ if __name__ == '__main__':
         is_running = False
 
     if is_running:
-        print "server already running"
+        print("server already running")
         sys.exit(1)
 
     start_server(config)
